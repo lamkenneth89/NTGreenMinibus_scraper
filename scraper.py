@@ -1,14 +1,17 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+import time
 import re
 
 def scrape_minibus_routes(urls):
     route_list = []
     for url in urls:
+        
         response = requests.get(url)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
+        time.sleep(2)
         for link in soup.find_all('a', class_='category-page__member-link'):
             route_code = link.get_text(strip=True)
             route_url = 'https://hkbus.fandom.com' + link['href']
