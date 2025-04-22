@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from scraper import generate_output  # Import the generate_output function
+import tempfile
 
 # Define the URLs and output file
 urls_to_scrape = [
@@ -8,21 +9,24 @@ urls_to_scrape = [
     "https://hkbus.fandom.com/wiki/%E5%88%86%E9%A1%9E:%E6%96%B0%E7%95%8C%E5%B0%88%E7%B6%AB%E5%B0%8F%E5%B7%B4%E8%B7%AF%E7%B7%9A?from=087K%0A%E6%96%B0%E7%95%8C%E5%B0%88%E7%B6%AB%E5%B0%8F%E5%B7%B487K%E7%B7%9A",
     "https://hkbus.fandom.com/wiki/%E5%88%86%E9%A1%9E:%E6%96%B0%E7%95%8C%E5%B0%88%E7%B6%AB%E5%B0%8F%E5%B7%B4%E8%B7%AF%E7%B7%9A?from=812%0A%E6%96%B0%E7%95%8C%E5%B0%88%E7%B6%AB%E5%B0%8F%E5%B7%B4812%E7%B7%9A"
 ]
-output_file = "minibus_vehicle_info.csv"
 
 st.title("Minibus Data Downloader")
 
 if st.button("Scrape and Download CSV"):
     with st.spinner("Scraping data and generating CSV..."):
-        df_final = generate_output(urls_to_scrape, output_file)
+        with tempfile.NamedTemporaryFile(mode='w+b', suffix='.csv', delete=False) as temp_file:
+            temp_filename = temp_file.name
+            df_final = generate_output(urls_to_scrape, temp_filename)
 
-        # Provide download button
-        with open(output_file, "rb") as file:
+            # Provide download button
+            temp_file.close() # close the file to avoid "Text file busy" error on linux 
+            with open(temp_filename, "rb") as file:
+
             btn = st.download_button(
                 label="Download CSV",
                 data=file,
-                file_name=output_file,
+                file_name="minibus_vehicle_info.csv",
                 mime="text/csv",
             )
     if btn:
-        st.success(f"Data scraped and saved to {output_file}. Click above to download.")
+        st.success(f"Data scraped and saved to temporary file. Click above to download.")
