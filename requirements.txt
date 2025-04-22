@@ -1,0 +1,9 @@
+# App dependencies
+requests
+beautifulsoup4
+pandas
+streamlit
+
+# Dev environment dependencies (optional, for development)
+# pip
+# autopep8
