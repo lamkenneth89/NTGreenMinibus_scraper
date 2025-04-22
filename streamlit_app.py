@@ -38,13 +38,13 @@ if st.button("Scrape and Download"):
                 if output_format == "CSV":
                     file_name = "minibus_vehicle_info.csv"
                     mime = "text/csv"
-                else:  # Excel
+                else:
                     for col in df_final.columns:
                       if df_final[col].dtype == 'object':
-                        df_final[col] = df_final[col].str.encode('big5', errors='ignore').str.decode('big5')
-                    
+                        df_final[col] = df_final[col].str.encode('utf-8', errors='ignore').str.decode('utf-8')
+
                     file_name = "minibus_vehicle_info.xlsx"
-                    mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"              
                 tmpfile.close()
                 with open(tmpfile.name, "rb") as file:
                     st.success(f"Data scraped and saved as {file_name}. Click below to download.")
