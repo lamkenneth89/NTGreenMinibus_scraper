@@ -30,28 +30,28 @@ if st.button("Scrape and Download"):
       st.warning("Please enter at least one url!")
     else:
       with st.spinner("Scraping data and generating file..."):
-          df_final = generate_output(urls_to_scrape)
-          if df_final is not None:
-              with tempfile.NamedTemporaryFile(mode="w+b", suffix=".tmp", delete=False) as temp_file:
-                  temp_filename = temp_file.name
-                  if output_format == "CSV":
-                      df_final.to_csv(temp_filename, index=False, encoding="utf-8")
-                      file_name = "minibus_vehicle_info.csv"
-                      mime = "text/csv"
-                  else:  # Excel
-                      for col in df_final.columns:
-                        if df_final[col].dtype == 'object':
-                          df_final[col] = df_final[col].str.encode('big5', errors='ignore').str.decode('big5')
-                      df_final.to_excel(temp_filename, index=False)
-                      file_name = "minibus_vehicle_info.xlsx"
-                      mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                  temp_file.close()
-                  with open(temp_filename, "rb") as file:
-                      st.success(f"Data scraped and saved as {file_name}. Click below to download.")
-                      btn = st.download_button(
-                          label=f"Download {output_format}",
-                          data=file,
-                          file_name=file_name,
-                          mime=mime,
-                      )
-                  os.remove(temp_filename)
+        file_extension = "csv" if output_format == "CSV" else "xlsx"
+        with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmpfile:
+            df_final = generate_output(urls_to_scrape, tmpfile.name)
+            if df_final is not None:
+                
+                if output_format == "CSV":
+                    file_name = "minibus_vehicle_info.csv"
+                    mime = "text/csv"
+                else:  # Excel
+                    for col in df_final.columns:
+                      if df_final[col].dtype == 'object':
+                        df_final[col] = df_final[col].str.encode('big5', errors='ignore').str.decode('big5')
+                    
+                    file_name = "minibus_vehicle_info.xlsx"
+                    mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                tmpfile.close()
+                with open(tmpfile.name, "rb") as file:
+                    st.success(f"Data scraped and saved as {file_name}. Click below to download.")
+                    btn = st.download_button(
+                        label=f"Download {output_format}",
+                        data=file,
+                        file_name=file_name,
+                        mime=mime,
+                    )
+                os.remove(tmpfile.name)
