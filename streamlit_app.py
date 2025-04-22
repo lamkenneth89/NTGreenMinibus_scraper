@@ -18,15 +18,14 @@ if st.button("Scrape and Download CSV"):
             temp_filename = temp_file.name
             df_final = generate_output(urls_to_scrape, temp_filename)
 
-            # Provide download button
-            temp_file.close() # close the file to avoid "Text file busy" error on linux 
-            with open(temp_filename, "rb") as file:
-
+        # Provide download button
+        temp_file.close()  # Close the file to avoid "Text file busy" error on Linux
+        with open(temp_filename, "rb") as file:
             btn = st.download_button(
                 label="Download CSV",
                 data=file,
                 file_name="minibus_vehicle_info.csv",
                 mime="text/csv",
-            )
+            )        
     if btn:
         st.success(f"Data scraped and saved to temporary file. Click above to download.")
