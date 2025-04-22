@@ -35,23 +35,26 @@ if st.button("Scrape and Download"):
             df_final = generate_output(urls_to_scrape, tmpfile.name)
             if df_final is not None:
                 
-                if output_format == "CSV":
+                if output_format == "CSV":                    
                     file_name = "minibus_vehicle_info.csv"
                     mime = "text/csv"
-                else:
+                    tmpfile.close()
+                    with open(tmpfile.name, "rb") as file:
+                        data_to_download = file.read()
+                else:                    
                     for col in df_final.columns:
                       if df_final[col].dtype == 'object':
                         df_final[col] = df_final[col].str.encode('utf-8', errors='ignore').str.decode('utf-8')
-
+                    df_final.to_excel(tmpfile, index=False, engine='openpyxl')
+                    tmpfile.seek(0)
                     file_name = "minibus_vehicle_info.xlsx"
-                    mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"              
-                tmpfile.close()
-                with open(tmpfile.name, "rb") as file:
-                    st.success(f"Data scraped and saved as {file_name}. Click below to download.")
-                    btn = st.download_button(
-                        label=f"Download {output_format}",
-                        data=file,
-                        file_name=file_name,
-                        mime=mime,
-                    )
+                    mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" 
+                    data_to_download = tmpfile.read()             
+                st.success(f"Data scraped and saved as {file_name}. Click below to download.")
+                btn = st.download_button(
+                    label=f"Download {output_format}",
+                    data=data_to_download,
+                    file_name=file_name,
+                    mime=mime,
+                )
                 os.remove(tmpfile.name)
