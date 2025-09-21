@@ -32,15 +32,24 @@ def scrape_vehicle_info(route_code, route_url):
             previous_seats = ""
             for row in rows[1:]:
                 columns = row.find_all('td')
+                if not columns:
+                    continue
+                # vehicle number is expected in the first td
+                vehicle_number = columns[0].get_text(strip=True)
+
+                # determine seats: prefer the 3rd column, then 2nd, otherwise reuse previous_seats
+                seats = ""
                 if len(columns) >= 3:
-                    vehicle_number = columns[0].get_text(strip=True)
-                    seats = columns[2].get_text(strip=True) if len(columns) >= 3 and columns[2].get_text(strip=True) else previous_seats
-                    vehicle_data.append([route_code, vehicle_number, seats])
-                    previous_seats = seats
-                elif len(columns) >= 2:
-                    vehicle_number = columns[0].get_text(strip=True)
+                    seats_text = columns[2].get_text(strip=True)
+                    seats = seats_text if seats_text else previous_seats
+                elif len(columns) == 2:
+                    seats_text = columns[1].get_text(strip=True)
+                    seats = seats_text if seats_text else previous_seats
+                else:  # len(columns) == 1
                     seats = previous_seats
-                    vehicle_data.append([route_code, vehicle_number, seats])
+
+                vehicle_data.append([route_code, vehicle_number, seats])
+                previous_seats = seats
             df_vehicle = pd.DataFrame(vehicle_data, columns=['Route Code', 'Vehicle Number', 'Seats'])
             return df_vehicle
     return pd.DataFrame(columns=['Route Code', 'Vehicle Number', 'Seats']) # Return empty DataFrame if no data found
